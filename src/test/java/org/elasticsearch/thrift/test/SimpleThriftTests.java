@@ -38,9 +38,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import ezbake.configuration.ClasspathConfigurationLoader;
+import ezbake.configuration.EzConfigurationLoaderException;
+import ezbake.thrift.ThriftUtils;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.hamcrest.Matchers.*;
 
@@ -65,13 +70,15 @@ public class SimpleThriftTests extends ElasticsearchIntegrationTest {
     }
 
     @Before
-    public void beforeTest() throws IOException, TTransportException {
+    public void beforeTest() throws IOException, TTransportException, EzConfigurationLoaderException {
         int port = getPort(randomInt(cluster().size()-1));
         logger.info("  --> Testing Thrift on port [{}]", port);
-        transport = new TSocket("localhost", port);
+        Properties props = new ClasspathConfigurationLoader().loadConfiguration();
+        //transport = new TSocket("localhost", port);
+        transport = ThriftUtils.getSslClientSocket("localhost", port, props);
         TProtocol protocol = new TBinaryProtocol(transport);
         client = new org.elasticsearch.thrift.Rest.Client(protocol);
-        transport.open();
+        //transport.open();
     }
 
     @Override

@@ -55,6 +55,23 @@
     </repositories>
 
     <dependencies>
+    	<dependency>
+            <groupId>ezbake</groupId>
+            <artifactId>thrift-utils</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+        	<groupId>ezbake</groupId>
+            <artifactId>ezbake-configuration-api</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+			<groupId>ezbake</groupId>
+			<artifactId>ezbake-common</artifactId>
+			<version>2.0-SNAPSHOT</version>
+		</dependency>
+
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-all</artifactId>
@@ -156,6 +173,40 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>with-dependencies</shadedClassifierName>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <!-- Exclude hadoop log4j.properties -->
+                                    <artifact>org.apache.hadoop:*</artifact>
+                                    <excludes>
+                                        <exclude>log4j.properties</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
@@ -214,7 +265,7 @@
                                 ${tests.jvm.argline}
                             </argLine>
                             <jvmArgs>
-                                <param>-Xmx512m</param>
+                                <param>-Xmx1024m</param>
                                 <param>-Xss256k</param>
                                 <param>-XX:MaxDirectMemorySize=512m</param>
                                 <param>-Des.logger.prefix=</param>

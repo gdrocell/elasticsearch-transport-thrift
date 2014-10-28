@@ -41,6 +41,14 @@ The thrift [schema](https://github.com/elasticsearch/elasticsearch-transport-thr
 * `thrift.publish_host`: Set explicit bindings for thrift protocol. Defaults to `transport.publish_host` or `transport.host`.
 * `thrift.protocol`: `binary` (default) which use Binary protocol or `compact` which uses Compact Protocol. See [Thrift documentation](https://thrift.apache.org/docs/concepts).
 
+## Ezbake Configuration
+
+You need to make sure that you set the EZCONFIGURATION_DIR variable, once the plugin is installed.
+
+```bash
+	export EZCONFIGURATION_DIR=/path/to/config
+```
+
 License
 -------
 

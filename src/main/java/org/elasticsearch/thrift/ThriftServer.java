@@ -36,15 +36,28 @@ import org.elasticsearch.common.transport.PortsRange;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.node.service.NodeService;
 import org.elasticsearch.transport.BindTransportException;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.Loggers;
+
+import ezbake.common.properties.EzProperties;
+import ezbake.configuration.ClasspathConfigurationLoader;
+import ezbake.configuration.DirectoryConfigurationLoader;
+import ezbake.configuration.EzConfiguration;
+import ezbake.thrift.ThriftUtils;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 import static org.elasticsearch.common.util.concurrent.EsExecutors.daemonThreadFactory;
 
 /**
+ * Modified by Gary Drocella 10/22/14
  */
 public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
 
@@ -68,6 +81,10 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
 
     private volatile int portNumber;
 
+    private final String USE_SSL_KEY = "es.plugin.thrift.use.ssl";
+    
+    private final ESLogger logger = Loggers.getLogger(ThriftServer.class);
+    
     @Inject
     public ThriftServer(Settings settings, NetworkService networkService, NodeService nodeService, ThriftRestImpl client) {
         super(settings);
@@ -79,6 +96,7 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
         this.bindHost = componentSettings.get("bind_host", settings.get("transport.bind_host", settings.get("transport.host")));
         this.publishHost = componentSettings.get("publish_host", settings.get("transport.publish_host", settings.get("transport.host")));
 
+        logger.debug("Using the protocol {}", componentSettings.get("protocol", "binary"));
         if (componentSettings.get("protocol", "binary").equals("compact")) {
             protocolFactory = new TCompactProtocol.Factory();
         } else {
@@ -102,11 +120,29 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
             @Override
             public boolean onPortNumber(int portNumber) {
                 ThriftServer.this.portNumber = portNumber;
+               
                 try {
+                    EzConfiguration ezconfig = new EzConfiguration();
+                    //Properties props = ezconfig.getProperties();
+                    Properties props = new DirectoryConfigurationLoader().loadConfiguration();
+                    
+                    boolean useSsl = Boolean.parseBoolean(props.getProperty(USE_SSL_KEY));
+                    
+                    
                     Rest.Processor processor = new Rest.Processor(client);
 
                     // Bind and start to accept incoming connections.
-                    TServerSocket serverSocket = new TServerSocket(new InetSocketAddress(bindAddr, portNumber));
+                    // Inserting code to use ssl in thrift transport
+                    
+                    TServerSocket serverSocket = null;
+                    
+                    if(!useSsl) {
+                        serverSocket = new TServerSocket(new InetSocketAddress(bindAddr, portNumber));
+                    }
+                    else {
+                        logger.info("Using SSL Server Socket");
+                        serverSocket = ThriftUtils.getSslServerSocket(new InetSocketAddress(bindAddr, portNumber), props);
+                    }
 
                     TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverSocket)
                             .minWorkerThreads(16)
@@ -114,7 +150,7 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
                             .inputProtocolFactory(protocolFactory)
                             .outputProtocolFactory(protocolFactory)
                             .processor(processor);
-
+                    
                     if (frame <= 0) {
                         args.inputTransportFactory(new TTransportFactory());
                         args.outputTransportFactory(new TTransportFactory());
@@ -144,6 +180,7 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
         daemonThreadFactory(settings, "thrift_server").newThread(new Runnable() {
             @Override
             public void run() {
+                logger.info("Server Serving");
                 server.serve();
             }
         }).start();
