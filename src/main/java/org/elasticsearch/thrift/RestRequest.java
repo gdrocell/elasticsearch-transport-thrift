@@ -9,7 +9,6 @@ package org.elasticsearch.thrift;
 import org.apache.thrift.scheme.IScheme;
 import org.apache.thrift.scheme.SchemeFactory;
 import org.apache.thrift.scheme.StandardScheme;
-
 import org.apache.thrift.scheme.TupleScheme;
 import org.apache.thrift.protocol.TTupleProtocol;
 import org.apache.thrift.protocol.TProtocolException;
@@ -17,6 +16,9 @@ import org.apache.thrift.EncodingUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.async.AsyncMethodCallback;
 import org.apache.thrift.server.AbstractNonblockingServer.*;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.Loggers;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -29,6 +31,7 @@ import java.util.Collections;
 import java.util.BitSet;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +44,8 @@ public class RestRequest implements org.apache.thrift.TBase<RestRequest, RestReq
   private static final org.apache.thrift.protocol.TField HEADERS_FIELD_DESC = new org.apache.thrift.protocol.TField("headers", org.apache.thrift.protocol.TType.MAP, (short)4);
   private static final org.apache.thrift.protocol.TField BODY_FIELD_DESC = new org.apache.thrift.protocol.TField("body", org.apache.thrift.protocol.TType.STRING, (short)5);
 
+  private static final ESLogger logger = Loggers.getLogger(RestRequest.class);
+  
   private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
   static {
     schemes.put(StandardScheme.class, new RestRequestStandardSchemeFactory());
@@ -871,6 +876,7 @@ public class RestRequest implements org.apache.thrift.TBase<RestRequest, RestReq
 
     @Override
     public void read(org.apache.thrift.protocol.TProtocol prot, RestRequest struct) throws org.apache.thrift.TException {
+      logger.debug("Read From Thrift Protocol");
       TTupleProtocol iprot = (TTupleProtocol) prot;
       struct.method = Method.findByValue(iprot.readI32());
       struct.setMethodIsSet(true);
@@ -911,7 +917,9 @@ public class RestRequest implements org.apache.thrift.TBase<RestRequest, RestReq
         struct.body = iprot.readBinary();
         struct.setBodyIsSet(true);
       }
+      logger.debug("I have Read thrift Rest Request {}", struct);
     }
+    
   }
 
 }

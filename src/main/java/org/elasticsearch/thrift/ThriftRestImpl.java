@@ -42,6 +42,7 @@ public class ThriftRestImpl extends AbstractComponent implements Rest.Iface {
 
     @Override
     public org.elasticsearch.thrift.RestResponse execute(RestRequest request) throws TException {
+        logger.debug("thrift message received {}", request);
         if (logger.isTraceEnabled()) {
             logger.trace("thrift message {}", request);
         }
