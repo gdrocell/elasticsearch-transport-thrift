@@ -81,7 +81,7 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
 
     private volatile int portNumber;
 
-    private final String USE_SSL_KEY = "es.plugin.thrift.use.ssl";
+    private final String USE_SSL_KEY = "thrift.use.ssl";
     
     private final ESLogger logger = Loggers.getLogger(ThriftServer.class);
     
@@ -97,11 +97,14 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
         this.publishHost = componentSettings.get("publish_host", settings.get("transport.publish_host", settings.get("transport.host")));
 
         logger.debug("Using the protocol {}", componentSettings.get("protocol", "binary"));
+        
         if (componentSettings.get("protocol", "binary").equals("compact")) {
             protocolFactory = new TCompactProtocol.Factory();
         } else {
             protocolFactory = new TBinaryProtocol.Factory();
         }
+        
+        logger.info("ssl directory is ", settings.get("ezbake.security.ssl.dir"));
     }
 
     @Override
@@ -123,12 +126,11 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
                
                 try {
                     EzConfiguration ezconfig = new EzConfiguration();
-                    //Properties props = ezconfig.getProperties();
                     Properties props = new DirectoryConfigurationLoader().loadConfiguration();
                     
-                    boolean useSsl = Boolean.parseBoolean(props.getProperty(USE_SSL_KEY));
+                    mergeProperties(props, settings);
                     
-                    
+                    boolean useSsl = settings.getAsBoolean("thrift.use.ssl", false);
                     Rest.Processor processor = new Rest.Processor(client);
 
                     // Bind and start to accept incoming connections.
@@ -194,5 +196,11 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
 
     @Override
     protected void doClose() throws ElasticsearchException {
+    }
+    
+    private void mergeProperties(Properties props, Settings settings) {
+        props.setProperty("ezbake.security.ssl.dir", settings.get("ezbake.security.ssl.dir"));
+        props.setProperty("ezbake.security.app.id", settings.get("ezbake.security.app.id"));
+        props.setProperty("thrift.use.ssl", settings.get("thrift.use.ssl"));
     }
 }
