@@ -1,10 +1,19 @@
+/data
+/work
+/logs
 /.idea
 /target
 .DS_Store
 *.iml
 /.project
-/.classpath
 /.settings
+<<<<<<< HEAD
 data
 .local-execution-hints.log
 /plugin_tools
+=======
+/.classpath
+/plugin_tools
+/.local-execution-hints.log
+/.local-*-execution-hints.log
+>>>>>>> upstream/es-1.5

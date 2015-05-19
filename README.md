@@ -3,6 +3,7 @@ Thrift Transport for Elasticsearch
 
 The thrift transport plugin allows to use the REST interface over [thrift](http://thrift.apache.org/) on top of HTTP.
 
+<<<<<<< HEAD
 In order to install the plugin, simply run: 
 
 ```sh
@@ -29,6 +30,13 @@ plugin --install transport-thrift \
        --url file:target/releases/elasticsearch-transport-thrift-X.X.X-SNAPSHOT.zip
 ```
 
+=======
+## Version 2.5.1-SNAPSHOT for Elasticsearch: 1.5
+
+If you are looking for another version documentation, please refer to the 
+[compatibility matrix](http://github.com/elasticsearch/elasticsearch-transport-thrift#thrift-transport-for-elasticsearch).
+
+>>>>>>> upstream/es-1.5
 ## Guide
 
 The thrift definition can be found under the `elasticsearch.thrift` file.
@@ -48,6 +56,7 @@ You need to make sure that you set the EZCONFIGURATION_DIR variable, once the pl
 ```bash
 	export EZCONFIGURATION_DIR=/path/to/config
 ```
+
 
 License
 -------

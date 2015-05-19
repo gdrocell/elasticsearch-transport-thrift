@@ -79,6 +79,7 @@ public class SimpleThriftTestsBackup extends ElasticsearchIntegrationTest {
         TProtocol protocol = new TBinaryProtocol(transport);
         client = new org.elasticsearch.thrift.Rest.Client(protocol);
         //transport.open();
+
     }
 
     //@Override
