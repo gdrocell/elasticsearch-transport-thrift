@@ -43,6 +43,7 @@ import ezbake.common.properties.EzProperties;
 import ezbake.configuration.ClasspathConfigurationLoader;
 import ezbake.configuration.DirectoryConfigurationLoader;
 import ezbake.configuration.EzConfiguration;
+import ezbake.thrift.ThriftServerUtils;
 import ezbake.thrift.ThriftUtils;
 
 import java.io.IOException;
@@ -52,7 +53,6 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 
 import static org.elasticsearch.common.util.concurrent.EsExecutors.daemonThreadFactory;
 
@@ -143,7 +143,7 @@ public class ThriftServer extends AbstractLifecycleComponent<ThriftServer> {
                     }
                     else {
                         logger.info("Using SSL Server Socket");
-                        serverSocket = ThriftUtils.getSslServerSocket(new InetSocketAddress(bindAddr, portNumber), props);
+                        serverSocket = ThriftServerUtils.getSslServerSocket(new InetSocketAddress(bindAddr, portNumber), props);
                     }
 
                     TThreadPoolServer.Args args = new TThreadPoolServer.Args(serverSocket)
